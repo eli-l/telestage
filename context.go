@@ -7,19 +7,31 @@ import (
 )
 
 type Context interface {
+	// Bot ...
 	Bot() *tgbotapi.BotAPI
+	// Upd ...
 	Upd() *tgbotapi.Update
+	// Message ...
 	Message() *tgbotapi.Message
+	// Sender ...
 	Sender() *tgbotapi.User
+	// Chat ...
 	Chat() *tgbotapi.Chat
+	// ChatID ...
 	ChatID() int64
+	// Text ...
 	Text() string
-	// Fast methods
 
+	// Fast methods
+	// SetDisableWebPreviewForShortMethods ...
 	SetDisableWebPreviewForShortMethods(bool)
+	// Reply ...
 	Reply(string) (tgbotapi.Message, error)
+	// ReplyWithMenu ...
 	ReplyWithMenu(string, interface{}) (tgbotapi.Message, error)
+	// ReplyHTML ...
 	ReplyHTML(string) (tgbotapi.Message, error)
+	// ReplyWithMenuHTML ...
 	ReplyWithMenuHTML(string, interface{}) (tgbotapi.Message, error)
 
 	// Get retrieves data from the context.
@@ -28,6 +40,7 @@ type Context interface {
 	Set(key string, val interface{})
 }
 
+// NativeContext ...
 type NativeContext struct {
 	bot   *tgbotapi.BotAPI
 	upd   *tgbotapi.Update
@@ -78,7 +91,7 @@ func (nc *NativeContext) Sender() *tgbotapi.User {
 	case nc.upd.PreCheckoutQuery != nil:
 		return nc.upd.PreCheckoutQuery.From
 	case nc.upd.PollAnswer != nil:
-		return &nc.upd.PollAnswer.User
+		return nc.upd.PollAnswer.User
 	case nc.upd.MyChatMember != nil:
 		return &nc.upd.MyChatMember.From
 	case nc.upd.ChatMember != nil:
@@ -93,9 +106,9 @@ func (nc *NativeContext) Sender() *tgbotapi.User {
 func (nc *NativeContext) Chat() *tgbotapi.Chat {
 	switch {
 	case nc.upd.Message != nil:
-		return nc.upd.Message.Chat
+		return &nc.upd.Message.Chat
 	case nc.Message() != nil:
-		return nc.Message().Chat
+		return &nc.Message().Chat
 	case nc.upd.MyChatMember != nil:
 		return &nc.upd.MyChatMember.Chat
 	case nc.upd.ChatMember != nil:
@@ -129,44 +142,62 @@ func (nc *NativeContext) Text() string {
 
 func (nc *NativeContext) Reply(text string) (tgbotapi.Message, error) {
 	m := tgbotapi.NewMessage(nc.ChatID(), text)
-	m.DisableWebPagePreview = nc.disableWebPreview
+	m.LinkPreviewOptions.IsDisabled = nc.disableWebPreview
 	return nc.bot.Send(tgbotapi.NewMessage(nc.ChatID(), text))
 }
 
 func (nc *NativeContext) ReplyWithMenu(text string, menu interface{}) (tgbotapi.Message, error) {
 	return nc.bot.Send(tgbotapi.MessageConfig{
 		BaseChat: tgbotapi.BaseChat{
-			ChatID:           nc.ChatID(),
-			ReplyToMessageID: 0,
-			ReplyMarkup:      menu,
+			ChatConfig: tgbotapi.ChatConfig{
+				ChatID: nc.ChatID(),
+			},
+			ReplyParameters: tgbotapi.ReplyParameters{
+				MessageID: 0,
+			},
+			ReplyMarkup: menu,
 		},
-		Text:                  text,
-		DisableWebPagePreview: nc.disableWebPreview,
+		Text: text,
+		LinkPreviewOptions: tgbotapi.LinkPreviewOptions{
+			IsDisabled: nc.disableWebPreview,
+		},
 	})
 }
 
 func (nc *NativeContext) ReplyHTML(text string) (tgbotapi.Message, error) {
 	return nc.bot.Send(tgbotapi.MessageConfig{
 		BaseChat: tgbotapi.BaseChat{
-			ChatID:           nc.ChatID(),
-			ReplyToMessageID: 0,
+			ChatConfig: tgbotapi.ChatConfig{
+				ChatID: nc.ChatID(),
+			},
+			ReplyParameters: tgbotapi.ReplyParameters{
+				MessageID: 0,
+			},
 		},
-		Text:                  text,
-		ParseMode:             tgbotapi.ModeHTML,
-		DisableWebPagePreview: nc.disableWebPreview,
+		ParseMode: tgbotapi.ModeHTML,
+		Text:      text,
+		LinkPreviewOptions: tgbotapi.LinkPreviewOptions{
+			IsDisabled: nc.disableWebPreview,
+		},
 	})
 }
 
 func (nc *NativeContext) ReplyWithMenuHTML(text string, menu interface{}) (tgbotapi.Message, error) {
 	return nc.bot.Send(tgbotapi.MessageConfig{
 		BaseChat: tgbotapi.BaseChat{
-			ChatID:           nc.ChatID(),
-			ReplyToMessageID: 0,
-			ReplyMarkup:      menu,
+			ChatConfig: tgbotapi.ChatConfig{
+				ChatID: nc.ChatID(),
+			},
+			ReplyParameters: tgbotapi.ReplyParameters{
+				MessageID: 0,
+			},
+			ReplyMarkup: menu,
 		},
-		Text:                  text,
-		ParseMode:             tgbotapi.ModeHTML,
-		DisableWebPagePreview: nc.disableWebPreview,
+		Text:      text,
+		ParseMode: tgbotapi.ModeHTML,
+		LinkPreviewOptions: tgbotapi.LinkPreviewOptions{
+			IsDisabled: nc.disableWebPreview,
+		},
 	})
 }
 

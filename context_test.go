@@ -168,7 +168,7 @@ func TestNativeContext_Sender(t *testing.T) {
 			name: "sender in pollAnswer",
 			upd: &tgbotapi.Update{
 				PollAnswer: &tgbotapi.PollAnswer{
-					User: *u,
+					User: u,
 				},
 			},
 			want: u,
@@ -229,7 +229,7 @@ func TestNativeContext_Chat(t *testing.T) {
 			name: "chat in message",
 			upd: &tgbotapi.Update{
 				Message: &tgbotapi.Message{
-					Chat: c,
+					Chat: *c,
 				},
 			},
 			want: c,
@@ -239,7 +239,7 @@ func TestNativeContext_Chat(t *testing.T) {
 			upd: &tgbotapi.Update{
 				CallbackQuery: &tgbotapi.CallbackQuery{
 					Message: &tgbotapi.Message{
-						Chat: c,
+						Chat: *c,
 					},
 				},
 			},

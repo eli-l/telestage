@@ -65,7 +65,7 @@ func TestSceneMiddleware(t *testing.T) {
 
 	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
 		Message: &tgbotapi.Message{
-			Chat: &tgbotapi.Chat{
+			Chat: tgbotapi.Chat{
 				Type: "group",
 			},
 		},
@@ -75,7 +75,7 @@ func TestSceneMiddleware(t *testing.T) {
 
 	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
 		Message: &tgbotapi.Message{
-			Chat: &tgbotapi.Chat{
+			Chat: tgbotapi.Chat{
 				Type: "private",
 			},
 		},

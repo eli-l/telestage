@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/askoldex/telestage"
+	"github.com/eli-l/telestage"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
