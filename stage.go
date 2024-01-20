@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbotapi "github.com/eli-l/telegram-bot-api/v7"
 )
 
 var (
@@ -13,35 +13,56 @@ var (
 
 type StateGetter func(Context) string
 
-type Stage struct {
-	scenes      map[string]*Scene
-	stateGetter StateGetter
+type SceneManagerInterface interface {
+	Add(state string, scene *Scene)
+	HandleUpdate(upd tgbotapi.Update) error
 }
 
-func NewStage(stateGetter StateGetter) *Stage {
-	return &Stage{
-		scenes:      map[string]*Scene{},
-		stateGetter: stateGetter,
+type SceneManager struct {
+	scenes       map[State]*Scene
+	bot          *tgbotapi.BotAPI
+	stateStorage StateStorage
+}
+
+func NewSceneManager(storage StateStorage, bot *tgbotapi.BotAPI) *SceneManager {
+	return &SceneManager{
+		scenes:       map[State]*Scene{},
+		bot:          bot,
+		stateStorage: storage,
 	}
 }
 
-func (s *Stage) Add(state string, scene *Scene) {
-	s.scenes[state] = scene
+func (s *SceneManager) Add(state string, scene *Scene) {
+	st := State(state)
+	s.scenes[st] = scene
 }
 
-func (s *Stage) Run(bot *tgbotapi.BotAPI, upd tgbotapi.Update) error {
+func (s *SceneManager) Get(sc string) *Scene {
+	st := State(sc)
+	scene, ok := s.scenes[st]
+	if !ok {
+		return &Scene{}
+	}
+	return scene
+}
+
+func (s *SceneManager) HandleUpdate(upd tgbotapi.Update) error {
 	ctx := &NativeContext{
-		bot: bot,
+		bot: s.bot,
 		upd: &upd,
 	}
 
-	state := s.stateGetter(ctx)
+	state, err := s.stateStorage.Get(ctx)
+	if err != nil {
+		return err
+	}
+
 	scene, ok := s.scenes[state]
 	if !ok {
 		return fmt.Errorf("%w with name %s", ErrSceneNotFound, state)
 	}
 
-	events := scene.GetEvents()
+	events := scene.GetEventHandler()
 	for _, e := range events {
 		if e(ctx) {
 			return nil

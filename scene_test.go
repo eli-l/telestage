@@ -4,20 +4,17 @@ import (
 	"strings"
 	"testing"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbotapi "github.com/eli-l/telegram-bot-api/v7"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
-
-var emptyStateGetter = func(ctx Context) string {
-	return ""
-}
 
 func TestGetEvents(t *testing.T) {
 	s := NewScene()
 	s.OnMessage(func(_ Context) {})
 	s.OnStart(func(_ Context) {})
 
-	assert.Equal(t, len(s.GetEvents()), 2, "get events len should be equal with 2")
+	assert.Equal(t, len(s.GetEventHandler()), 2, "get eventHandlers len should be equal with 2")
 }
 
 func TestOnCommand(t *testing.T) {
@@ -28,10 +25,12 @@ func TestOnCommand(t *testing.T) {
 		invoked = true
 	})
 
-	stage := NewStage(emptyStateGetter)
-	stage.Add("", s)
+	storage := NewInMemoryStateStorage()
 
-	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
+	stage := NewSceneManager(storage, &tgbotapi.BotAPI{})
+	stage.Add("main", s)
+
+	err := stage.HandleUpdate(tgbotapi.Update{
 		Message: &tgbotapi.Message{
 			Text: "/" + cmd,
 			Entities: []tgbotapi.MessageEntity{
@@ -41,10 +40,13 @@ func TestOnCommand(t *testing.T) {
 					Length: len(cmd) + 1, // plus slash
 				},
 			},
+			From: &tgbotapi.User{
+				ID: 1,
+			},
 		},
 	})
-
-	assert.True(t, invoked, "they should be true if message command is "+cmd)
+	require.NoError(t, err)
+	assert.True(t, invoked)
 }
 
 func TestSceneMiddleware(t *testing.T) {
@@ -60,28 +62,39 @@ func TestSceneMiddleware(t *testing.T) {
 	s.OnMessage(func(_ Context) {
 		invoked = true
 	})
-	stage := NewStage(emptyStateGetter)
-	stage.Add("", s)
+	storage := NewInMemoryStateStorage()
 
-	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
+	stage := NewSceneManager(storage, &tgbotapi.BotAPI{})
+	stage.Add("main", s)
+
+	err := stage.HandleUpdate(tgbotapi.Update{
 		Message: &tgbotapi.Message{
 			Chat: tgbotapi.Chat{
 				Type: "group",
 			},
-		},
-	})
-
-	assert.False(t, invoked, "they should be false, because chat type is not private")
-
-	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
-		Message: &tgbotapi.Message{
-			Chat: tgbotapi.Chat{
-				Type: "private",
+			From: &tgbotapi.User{
+				ID: 1,
 			},
 		},
 	})
 
-	assert.True(t, invoked, "they should be true, because chat type is private")
+	require.NoError(t, err)
+
+	assert.False(t, invoked)
+
+	err = stage.HandleUpdate(tgbotapi.Update{
+		Message: &tgbotapi.Message{
+			Chat: tgbotapi.Chat{
+				Type: "private",
+			},
+			From: &tgbotapi.User{
+				ID: 1,
+			},
+		},
+	})
+	require.NoError(t, err)
+
+	assert.True(t, invoked)
 }
 
 func TestEventGroupMiddleware(t *testing.T) {
@@ -97,20 +110,32 @@ func TestEventGroupMiddleware(t *testing.T) {
 		}
 	})
 
-	stage := NewStage(emptyStateGetter)
-	stage.Add("", s)
+	storage := NewInMemoryStateStorage()
+	bot := &tgbotapi.BotAPI{}
 
-	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
-		Message: &tgbotapi.Message{},
+	sm := NewSceneManager(storage, bot)
+	sm.Add("main", s)
+
+	err := sm.HandleUpdate(tgbotapi.Update{
+		Message: &tgbotapi.Message{
+			From: &tgbotapi.User{
+				ID: 1,
+			},
+		},
 	})
+	require.NoError(t, err)
 
 	assert.False(t, groupMiddlewareInvoked, "they should be false, because event OnSticker not invoked")
 
-	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
+	err = sm.HandleUpdate(tgbotapi.Update{
 		Message: &tgbotapi.Message{
 			Sticker: &tgbotapi.Sticker{},
+			From: &tgbotapi.User{
+				ID: 1,
+			},
 		},
 	})
+	require.NoError(t, err)
 
 	assert.True(t, groupMiddlewareInvoked, "they should be true, because event OnSticker invoked")
 }
@@ -125,13 +150,19 @@ func TestEventMiddleware(t *testing.T) {
 		}
 	})
 
-	stage := NewStage(emptyStateGetter)
-	stage.Add("", s)
+	storage := NewInMemoryStateStorage()
+	bot := &tgbotapi.BotAPI{}
+	sm := NewSceneManager(storage, bot)
+	sm.Add("main", s)
 
-	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
-		Message: &tgbotapi.Message{},
+	err := sm.HandleUpdate(tgbotapi.Update{
+		Message: &tgbotapi.Message{
+			From: &tgbotapi.User{
+				ID: 1,
+			},
+		},
 	})
-
+	require.NoError(t, err)
 	assert.True(t, eventMiddlewareInvoked, "they should be true, because event OnMessage invoked")
 }
 
@@ -142,10 +173,12 @@ func TestOnStart(t *testing.T) {
 		invoked = true
 	})
 
-	stage := NewStage(emptyStateGetter)
-	stage.Add("", s)
+	storage := NewInMemoryStateStorage()
+	bot := &tgbotapi.BotAPI{}
+	sm := NewSceneManager(storage, bot)
+	sm.Add("main", s)
 
-	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
+	err := sm.HandleUpdate(tgbotapi.Update{
 		Message: &tgbotapi.Message{
 			Text: "/start",
 			Entities: []tgbotapi.MessageEntity{
@@ -155,9 +188,12 @@ func TestOnStart(t *testing.T) {
 					Length: 6, // /start
 				},
 			},
+			From: &tgbotapi.User{
+				ID: 1,
+			},
 		},
 	})
-
+	require.NoError(t, err)
 	assert.True(t, invoked, "they should be true if message command is /start")
 }
 
@@ -168,19 +204,25 @@ func TestOnPhoto(t *testing.T) {
 		invoked = true
 	})
 
-	stage := NewStage(emptyStateGetter)
-	stage.Add("", s)
+	storage := NewInMemoryStateStorage()
+	bot := &tgbotapi.BotAPI{}
+	sm := NewSceneManager(storage, bot)
+	sm.Add("main", s)
 
-	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
+	err := sm.HandleUpdate(tgbotapi.Update{
 		Message: &tgbotapi.Message{
 			Photo: []tgbotapi.PhotoSize{
 				{
 					FileID: "random_file_id",
 				},
 			},
+			From: &tgbotapi.User{
+				ID: 1,
+			},
 		},
 	})
 
+	require.NoError(t, err)
 	assert.True(t, invoked, "they should be true if message photo is not nil")
 }
 
@@ -191,17 +233,23 @@ func TestOnSticker(t *testing.T) {
 		invoked = true
 	})
 
-	stage := NewStage(emptyStateGetter)
-	stage.Add("", s)
+	storage := NewInMemoryStateStorage()
+	bot := &tgbotapi.BotAPI{}
+	sm := NewSceneManager(storage, bot)
+	sm.Add("main", s)
 
-	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
+	err := sm.HandleUpdate(tgbotapi.Update{
 		Message: &tgbotapi.Message{
 			Sticker: &tgbotapi.Sticker{
 				FileID: "random_file_id",
 			},
+			From: &tgbotapi.User{
+				ID: 1,
+			},
 		},
 	})
 
+	require.NoError(t, err)
 	assert.True(t, invoked, "they should be true if message sticker is not nil")
 }
 
@@ -212,13 +260,20 @@ func TestOnMessage(t *testing.T) {
 		invoked = true
 	})
 
-	stage := NewStage(emptyStateGetter)
+	storage := NewInMemoryStateStorage()
+	bot := &tgbotapi.BotAPI{}
+	sm := NewSceneManager(storage, bot)
+	sm.Add("main", s)
 
-	stage.Add("", s)
-	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
-		Message: &tgbotapi.Message{},
+	err := sm.HandleUpdate(tgbotapi.Update{
+		Message: &tgbotapi.Message{
+			From: &tgbotapi.User{
+				ID: 1,
+			},
+		},
 	})
 
+	require.NoError(t, err)
 	assert.True(t, invoked, "they should be true if message is not nil")
 }
 
@@ -234,21 +289,31 @@ func TestOwnEvent(t *testing.T) {
 	s.On(messageTextContains("hello"), func(_ Context) {
 		invoked = true
 	})
-	stage := NewStage(emptyStateGetter)
-	stage.Add("", s)
+	storage := NewInMemoryStateStorage()
+	bot := &tgbotapi.BotAPI{}
+	sm := NewSceneManager(storage, bot)
+	sm.Add("main", s)
 
-	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
+	err := sm.HandleUpdate(tgbotapi.Update{
 		Message: &tgbotapi.Message{
 			Text: "hello, my name is John Doe",
+			From: &tgbotapi.User{
+				ID: 1,
+			},
 		},
 	})
+	require.NoError(t, err)
 	assert.True(t, invoked, "they should be true if message text contains 'hello'")
 
 	invoked = false
-	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
+	err = sm.HandleUpdate(tgbotapi.Update{
 		Message: &tgbotapi.Message{
 			Caption: "hello, its my first picture",
+			From: &tgbotapi.User{
+				ID: 1,
+			},
 		},
 	})
+	require.NoError(t, err)
 	assert.True(t, invoked, "they should be true if message caption contains 'hello'")
 }
