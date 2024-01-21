@@ -1,20 +1,20 @@
 package telestage
 
 type EventFn func(Context)
-type Event func(Context) bool
+type EventHandler func(Context) bool
 type EventDeterminant func(Context) bool
 
 type Scene struct {
-	events      []Event
-	middlewares []Middleware
+	eventHandlers []EventHandler
+	middlewares   []Middleware
 }
 
 func NewScene() *Scene {
 	return &Scene{}
 }
 
-func (s *Scene) GetEvents() []Event {
-	return s.events
+func (s *Scene) GetEventHandler() []EventHandler {
+	return s.eventHandlers
 }
 
 func (s *Scene) Use(mw ...Middleware) {
@@ -31,7 +31,7 @@ func (s *Scene) UseGroup(group func(*Scene), mw ...Middleware) {
 // OnCommand handle the command specified by first argument
 func (s *Scene) OnCommand(cmd string, ef EventFn, mw ...Middleware) {
 	ef = applyMiddleware(ef, append(s.middlewares, mw...)...)
-	s.events = append(s.events, func(ctx Context) bool {
+	s.eventHandlers = append(s.eventHandlers, func(ctx Context) bool {
 		if ctx.Upd().Message == nil || ctx.Upd().Message.Command() != cmd {
 			return false
 		}
@@ -43,7 +43,7 @@ func (s *Scene) OnCommand(cmd string, ef EventFn, mw ...Middleware) {
 // OnMessage handle any message type (photo, text, sticker etc.)
 func (s *Scene) OnMessage(ef EventFn, mw ...Middleware) {
 	ef = applyMiddleware(ef, append(s.middlewares, mw...)...)
-	s.events = append(s.events, func(ctx Context) bool {
+	s.eventHandlers = append(s.eventHandlers, func(ctx Context) bool {
 		if ctx.Upd().Message == nil {
 			return false
 		}
@@ -55,7 +55,7 @@ func (s *Scene) OnMessage(ef EventFn, mw ...Middleware) {
 // OnPhoto handle sending a photo
 func (s *Scene) OnPhoto(ef EventFn, mw ...Middleware) {
 	ef = applyMiddleware(ef, append(s.middlewares, mw...)...)
-	s.events = append(s.events, func(ctx Context) bool {
+	s.eventHandlers = append(s.eventHandlers, func(ctx Context) bool {
 		m := ctx.Message()
 		if m == nil || len(m.Photo) == 0 {
 			return false
@@ -68,7 +68,7 @@ func (s *Scene) OnPhoto(ef EventFn, mw ...Middleware) {
 // OnSticker handle sending a sticker
 func (s *Scene) OnSticker(ef EventFn, mw ...Middleware) {
 	ef = applyMiddleware(ef, append(s.middlewares, mw...)...)
-	s.events = append(s.events, func(ctx Context) bool {
+	s.eventHandlers = append(s.eventHandlers, func(ctx Context) bool {
 		m := ctx.Message()
 		if m == nil || m.Sticker == nil {
 			return false
@@ -86,7 +86,7 @@ func (s *Scene) OnStart(ef EventFn, mw ...Middleware) {
 // On handle the your own event determinator
 func (s *Scene) On(determinant EventDeterminant, ef EventFn, mw ...Middleware) {
 	ef = applyMiddleware(ef, append(s.middlewares, mw...)...)
-	s.events = append(s.events, func(ctx Context) bool {
+	s.eventHandlers = append(s.eventHandlers, func(ctx Context) bool {
 		if !determinant(ctx) {
 			return false
 		}

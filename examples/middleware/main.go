@@ -6,12 +6,17 @@ import (
 
 	"github.com/eli-l/telestage"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbotapi "github.com/eli-l/telegram-bot-api/v7"
 )
 
 func main() {
-	stateStore := NewStateStore()
-	stg := telestage.NewStage(stateStore.Getter())
+	stateStore := telestage.NewInMemoryStateStorage()
+	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
+	if err != nil {
+		panic(err)
+	}
+
+	stg := telestage.NewSceneManager(stateStore, bot)
 	mainScene := telestage.NewScene()
 	stg.Add("main", mainScene)
 
@@ -39,7 +44,6 @@ func main() {
 		ctx.Reply("Hello") // answer on any message
 	})
 
-	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -49,35 +53,6 @@ func main() {
 	upds := bot.GetUpdatesChan(u)
 
 	for upd := range upds {
-		stg.Run(bot, upd)
+		stg.HandleUpdate(upd)
 	}
-}
-
-type stateStore struct {
-	states map[int64]string
-}
-
-func NewStateStore() *stateStore {
-	return &stateStore{
-		states: map[int64]string{},
-	}
-}
-
-func (ss *stateStore) Getter() telestage.StateGetter {
-	return func(ctx telestage.Context) string {
-		return ss.Get(ctx.Sender().ID)
-	}
-}
-
-func (ss *stateStore) Get(userID int64) string {
-	state, ok := ss.states[userID]
-	if !ok {
-		return "main"
-	}
-
-	return state
-}
-
-func (ss *stateStore) Set(userID int64, state string) {
-	ss.states[userID] = state
 }

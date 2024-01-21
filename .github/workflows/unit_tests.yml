@@ -1,15 +1,14 @@
-name: Test
+name: Unit tests
 
 on:
   push:
     branches:
-      - master
-      - develop
+        - '**'
   pull_request:
 
 jobs:
   build:
-    name: Test
+    name: Unit tests
     runs-on: ubuntu-latest
     steps:
     - name: Set up Go 1.x

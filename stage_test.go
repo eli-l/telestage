@@ -1,48 +1,58 @@
-package telestage
+package telestage_test
 
 import (
 	"testing"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbotapi "github.com/eli-l/telegram-bot-api/v7"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
+
+	"github.com/eli-l/telestage"
 )
 
-type stateStorage struct {
-	state string
-}
-
-func (s *stateStorage) Set(state string) {
-	s.state = state
-}
-
-func (s *stateStorage) Get() string {
-	return s.state
-}
 func TestStateGetting(t *testing.T) {
-	firstScene := NewScene()
+
+	ctrl := gomock.NewController(t)
+	ctx := NewMockContext(ctrl)
+	ctx.EXPECT().Sender().Return(&tgbotapi.User{ID: 1}).AnyTimes()
+
+	firstScene := telestage.NewScene()
+
 	firstSceneInvoked := false
-	firstScene.OnMessage(func(ctx Context) {
+	firstScene.OnMessage(func(ctx telestage.Context) {
 		firstSceneInvoked = true
 	})
 
-	secondScene := NewScene()
+	secondScene := telestage.NewScene()
 	secondSceneInvoked := false
-	secondScene.OnMessage(func(ctx Context) {
+	secondScene.OnMessage(func(ctx telestage.Context) {
 		secondSceneInvoked = true
 	})
-	stateStorage := &stateStorage{}
-	stateGetter := func(ctx Context) string {
-		return stateStorage.Get()
-	}
-	stage := NewStage(stateGetter)
 
-	stage.Add("", firstScene)
-	stage.Add("second", secondScene)
+	storage := telestage.NewInMemoryStateStorage()
+	bot := &tgbotapi.BotAPI{}
 
-	stateStorage.Set("")
-	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
-		Message: &tgbotapi.Message{},
+	sm := telestage.NewSceneManager(storage, bot)
+
+	sm.Add("main", firstScene)
+	sm.Add("second", secondScene)
+
+	err := storage.Set(ctx, "main")
+	require.NoError(t, err)
+
+	err = sm.HandleUpdate(tgbotapi.Update{
+		Message: &tgbotapi.Message{
+			From: &tgbotapi.User{
+				ID: 1,
+			},
+		},
 	})
+	require.NoError(t, err)
+
+	err = storage.Set(ctx, "second")
+	require.NoError(t, err)
+
 	assert.Condition(t, func() (success bool) {
 		if firstSceneInvoked && !secondSceneInvoked {
 			return true
@@ -50,12 +60,17 @@ func TestStateGetting(t *testing.T) {
 		return false
 	}, "if state = '', only firstScene event(OnMessage) must be invoked")
 
-	stateStorage.Set("second")
 	firstSceneInvoked = false
 	secondSceneInvoked = false
-	stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{
-		Message: &tgbotapi.Message{},
+	err = sm.HandleUpdate(tgbotapi.Update{
+		Message: &tgbotapi.Message{
+			From: &tgbotapi.User{
+				ID: 1,
+			},
+		},
 	})
+
+	require.NoError(t, err)
 
 	assert.Condition(t, func() (success bool) {
 		if !firstSceneInvoked && secondSceneInvoked {
@@ -66,31 +81,19 @@ func TestStateGetting(t *testing.T) {
 }
 
 func TestUndefinedScene(t *testing.T) {
-	stage := NewStage(emptyStateGetter)
-
-	err := stage.Run(&tgbotapi.BotAPI{}, tgbotapi.Update{})
-	assert.Error(t, err, "call undefined scene")
-
+	storage := telestage.NewInMemoryStateStorage()
+	bot := &tgbotapi.BotAPI{}
+	sm := telestage.NewSceneManager(storage, bot)
+	err := sm.HandleUpdate(tgbotapi.Update{})
+	require.Error(t, err)
 }
 
 func TestStage_Add(t *testing.T) {
-	stage := NewStage(emptyStateGetter)
-
-	scene := NewScene()
+	storage := telestage.NewInMemoryStateStorage()
+	bot := &tgbotapi.BotAPI{}
+	sm := telestage.NewSceneManager(storage, bot)
+	scene := telestage.NewScene()
 	k := "main"
-	stage.Add(k, scene)
-
-	assert.Equal(t, scene, stage.scenes[k], "add scene to stage")
-}
-
-func TestStage_NewStage(t *testing.T) {
-	sg := func(ctx Context) string {
-		return "test"
-	}
-	stage := NewStage(sg)
-	ctx := &NativeContext{
-		bot: &tgbotapi.BotAPI{},
-		upd: &tgbotapi.Update{},
-	}
-	assert.Equal(t, sg(ctx), stage.stateGetter(ctx), "new stage")
+	sm.Add(k, scene)
+	require.Equal(t, scene, sm.Get(k))
 }

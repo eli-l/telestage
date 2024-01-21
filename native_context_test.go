@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbotapi "github.com/eli-l/telegram-bot-api/v7"
 	"github.com/stretchr/testify/assert"
 )
 

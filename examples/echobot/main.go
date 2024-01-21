@@ -6,23 +6,26 @@ import (
 
 	"github.com/eli-l/telestage"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	tgbotapi "github.com/eli-l/telegram-bot-api/v7"
 )
 
 func main() {
-	stateStore := NewStateStore()
-	stg := telestage.NewStage(stateStore.Getter())
+	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	stateStore := telestage.NewInMemoryStateStorage()
+
 	mainScene := telestage.NewScene()
 	messageScene := telestage.NewScene()
-	stg.Add("main", mainScene)
-	stg.Add("message", messageScene)
 
 	messageScene.OnStart(func(ctx telestage.Context) {
 		ctx.Reply("Hello from message scene, go back: /leave")
 	})
 
 	messageScene.OnCommand("leave", func(ctx telestage.Context) {
-		stateStore.Set(ctx.Sender().ID, "main")
+		stateStore.Set(ctx, "main")
 		ctx.Reply("Welcome in main scene, send: /start")
 	})
 
@@ -35,7 +38,7 @@ func main() {
 	})
 
 	mainScene.OnCommand("enter", func(ctx telestage.Context) {
-		stateStore.Set(ctx.Sender().ID, "message")
+		stateStore.Set(ctx, "message")
 		ctx.Reply("Now send: /start")
 	})
 
@@ -43,45 +46,18 @@ func main() {
 		ctx.Reply("Incorrect input")
 	})
 
-	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	upds := bot.GetUpdatesChan(u)
 
+	sceneManager := telestage.NewSceneManager(stateStore, bot)
+	sceneManager.Add("main", mainScene)
+	sceneManager.Add("message", messageScene)
+
 	for upd := range upds {
-		stg.Run(bot, upd)
+		err := sceneManager.HandleUpdate(upd)
+		if err != nil {
+			log.Println(err)
+		}
 	}
-}
-
-type stateStore struct {
-	states map[int64]string
-}
-
-func NewStateStore() *stateStore {
-	return &stateStore{
-		states: map[int64]string{},
-	}
-}
-
-func (ss *stateStore) Getter() telestage.StateGetter {
-	return func(ctx telestage.Context) string {
-		return ss.Get(ctx.Sender().ID)
-	}
-}
-
-func (ss *stateStore) Get(userID int64) string {
-	state, ok := ss.states[userID]
-	if !ok {
-		return "main"
-	}
-
-	return state
-}
-
-func (ss *stateStore) Set(userID int64, state string) {
-	ss.states[userID] = state
 }
