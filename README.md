@@ -14,8 +14,8 @@ This is a fork of original work [telestage](https://github.com/kbgod/telestage)
 - [x] Update codebase to meet the telegram-bot-api changes
 - [x] Update docs
 - [x] Add gitignore
-- [] Update codebase to use new fork without replaces
-- [] Create GitHub actions for test
+- [x] Update codebase to use new fork without replaces
+- [x] Create GitHub actions for tests
 
 ## Telestage event driven framework using fsm.
 

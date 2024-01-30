@@ -3,6 +3,8 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/eli-l/telegram-bot-api/v7 v7.0.0/go.mod h1:FkwmNdPSnJrfEj1GYI3gXuHenX9mv7d4TFtVXIptec0=
 github.com/eli-l/telegram-bot-api/v7 v7.0.1 h1:Gj4N9pudfUsoN8EZXfKtqjEF43JvzLB1hKUHpdG0GX4=
 github.com/eli-l/telegram-bot-api/v7 v7.0.1/go.mod h1:9l3cCOB9X7CVWVdXsLGNc0S3cgtuQPkzbvVGdUFfCnA=
+github.com/eli-l/telegram-bot-api/v7 v7.1.0 h1:odb1z/dyxDczrS7/bnvwCtgEbGmTNkHnf7ZdWDAkIEk=
+github.com/eli-l/telegram-bot-api/v7 v7.1.0/go.mod h1:9l3cCOB9X7CVWVdXsLGNc0S3cgtuQPkzbvVGdUFfCnA=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=

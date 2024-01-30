@@ -10,8 +10,10 @@ import (
 )
 
 func main() {
-	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
-	if err != nil {
+	config := tgbotapi.NewDefaultBotConfig(os.Getenv("BOT_TOKEN"))
+	bot := tgbotapi.NewBot(config)
+
+	if err := bot.Validate(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -48,7 +50,10 @@ func main() {
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
-	upds := bot.GetUpdatesChan(u)
+	upds, err := tgbotapi.NewPollingHandler(bot, u).InitUpdatesChannel()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	sceneManager := telestage.NewSceneManager(stateStore, bot)
 	sceneManager.Add("main", mainScene)

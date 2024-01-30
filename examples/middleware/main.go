@@ -11,7 +11,11 @@ import (
 
 func main() {
 	stateStore := telestage.NewInMemoryStateStorage()
-	bot, err := tgbotapi.NewBotAPI(os.Getenv("BOT_TOKEN"))
+
+	bc := tgbotapi.NewDefaultBotConfig(os.Getenv("BOT_TOKEN"))
+
+	bot := tgbotapi.NewBot(bc)
+	err := bot.Validate()
 	if err != nil {
 		panic(err)
 	}
@@ -50,7 +54,11 @@ func main() {
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
-	upds := bot.GetUpdatesChan(u)
+
+	upds, err := tgbotapi.NewPollingHandler(bot, u).InitUpdatesChannel()
+	if err != nil {
+		panic(err)
+	}
 
 	for upd := range upds {
 		stg.HandleUpdate(upd)
