@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
+
+	"github.com/redis/go-redis/v9"
 
 	"github.com/eli-l/telestage"
 
@@ -13,39 +16,60 @@ func main() {
 	config := tgbotapi.NewDefaultBotConfig(os.Getenv("BOT_TOKEN"))
 	bot := tgbotapi.NewBot(config)
 
+	//bot.Request(tgbotapi.WebhookConfig{
+	//	URL: nil,
+	//})
+	//hook, _ := bot.GetWebhookInfo()
+	//_ = hook
+
 	if err := bot.Validate(); err != nil {
 		log.Fatal(err)
 	}
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       1,
+	})
+
+	rStateStore := telestage.NewRedisStateStorage(rdb, telestage.EXPIRE_HOUR)
+	_ = rStateStore
 
 	stateStore := telestage.NewInMemoryStateStorage()
 
 	mainScene := telestage.NewScene()
 	messageScene := telestage.NewScene()
 
-	messageScene.OnStart(func(ctx telestage.Context) {
-		ctx.Reply("Hello from message scene, go back: /leave")
+	messageScene.OnStart(func(ctx context.Context) {
+		bctx := telestage.GetBotContext(ctx)
+		bctx.Reply("Hello from message scene, go back: /leave")
 	})
 
-	messageScene.OnCommand("leave", func(ctx telestage.Context) {
+	messageScene.OnCommand("leave", func(ctx context.Context) {
+		bctx := telestage.GetBotContext(ctx)
 		stateStore.Set(ctx, "main")
-		ctx.Reply("Welcome in main scene, send: /start")
+		bctx.Reply("Welcome in main scene, send: /start")
 	})
 
-	messageScene.OnMessage(func(ctx telestage.Context) {
-		ctx.Reply("You in message scene")
+	messageScene.OnMessage(func(ctx context.Context) {
+		bctx := telestage.GetBotContext(ctx)
+		bctx.Reply("You in message scene")
 	})
 
-	mainScene.OnStart(func(ctx telestage.Context) {
-		ctx.Reply("Hello world. send: /enter")
+	mainScene.OnStart(func(ctx context.Context) {
+		bctx := telestage.GetBotContext(ctx)
+		bctx.Reply("Hello world. send: /enter")
 	})
 
-	mainScene.OnCommand("enter", func(ctx telestage.Context) {
+	mainScene.OnCommand("enter", func(ctx context.Context) {
+		bctx := telestage.GetBotContext(ctx)
 		stateStore.Set(ctx, "message")
-		ctx.Reply("Now send: /start")
+		bctx.Reply("Now send: /start")
 	})
 
-	mainScene.OnMessage(func(ctx telestage.Context) {
-		ctx.Reply("Incorrect input")
+	mainScene.OnMessage(func(ctx context.Context) {
+		bctx := telestage.GetBotContext(ctx)
+		bctx.Reply("Incorrect input")
 	})
 
 	u := tgbotapi.NewUpdate(0)

@@ -1,6 +1,7 @@
 package telestage_test
 
 import (
+	"context"
 	"testing"
 
 	tgbotapi "github.com/eli-l/telegram-bot-api/v7"
@@ -14,19 +15,21 @@ import (
 func TestStateGetting(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
-	ctx := NewMockContext(ctrl)
-	ctx.EXPECT().Sender().Return(&tgbotapi.User{ID: 1}).AnyTimes()
+	ctx := context.Background()
+	bctx := NewMockContext(ctrl)
+	bctx.EXPECT().Sender().Return(&tgbotapi.User{ID: 1}).AnyTimes()
+	ctx = telestage.WithBotContext(ctx, bctx)
 
 	firstScene := telestage.NewScene()
 
 	firstSceneInvoked := false
-	firstScene.OnMessage(func(ctx telestage.Context) {
+	firstScene.OnMessage(func(ctx context.Context) {
 		firstSceneInvoked = true
 	})
 
 	secondScene := telestage.NewScene()
 	secondSceneInvoked := false
-	secondScene.OnMessage(func(ctx telestage.Context) {
+	secondScene.OnMessage(func(ctx context.Context) {
 		secondSceneInvoked = true
 	})
 
