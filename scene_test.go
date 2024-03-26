@@ -1,6 +1,7 @@
 package telestage
 
 import (
+	"context"
 	"strings"
 	"testing"
 
@@ -11,8 +12,8 @@ import (
 
 func TestGetEvents(t *testing.T) {
 	s := NewScene()
-	s.OnMessage(func(_ Context) {})
-	s.OnStart(func(_ Context) {})
+	s.OnMessage(func(_ context.Context) {})
+	s.OnStart(func(_ context.Context) {})
 
 	assert.Equal(t, len(s.GetEventHandler()), 2, "get eventHandlers len should be equal with 2")
 }
@@ -21,7 +22,7 @@ func TestOnCommand(t *testing.T) {
 	s := NewScene()
 	invoked := false
 	cmd := "test"
-	s.OnCommand(cmd, func(_ Context) {
+	s.OnCommand(cmd, func(_ context.Context) {
 		invoked = true
 	})
 
@@ -52,14 +53,15 @@ func TestOnCommand(t *testing.T) {
 func TestSceneMiddleware(t *testing.T) {
 	s := NewScene()
 	s.Use(func(ef EventFn) EventFn {
-		return func(ctx Context) {
-			if ctx.Upd().FromChat().IsPrivate() {
+		return func(ctx context.Context) {
+			bctx := GetBotContext(ctx)
+			if bctx.Upd().FromChat().IsPrivate() {
 				ef(ctx)
 			}
 		}
 	})
 	invoked := false
-	s.OnMessage(func(_ Context) {
+	s.OnMessage(func(_ context.Context) {
 		invoked = true
 	})
 	storage := NewInMemoryStateStorage()
@@ -102,9 +104,9 @@ func TestEventGroupMiddleware(t *testing.T) {
 
 	groupMiddlewareInvoked := false
 	s.UseGroup(func(s *Scene) {
-		s.OnSticker(func(_ Context) {})
+		s.OnSticker(func(_ context.Context) {})
 	}, func(ef EventFn) EventFn {
-		return func(ctx Context) {
+		return func(ctx context.Context) {
 			groupMiddlewareInvoked = true
 			ef(ctx)
 		}
@@ -144,8 +146,8 @@ func TestEventMiddleware(t *testing.T) {
 	s := NewScene()
 
 	eventMiddlewareInvoked := false
-	s.OnMessage(func(_ Context) {}, func(ef EventFn) EventFn {
-		return func(ctx Context) {
+	s.OnMessage(func(_ context.Context) {}, func(ef EventFn) EventFn {
+		return func(ctx context.Context) {
 			eventMiddlewareInvoked = true
 		}
 	})
@@ -169,7 +171,7 @@ func TestEventMiddleware(t *testing.T) {
 func TestOnStart(t *testing.T) {
 	s := NewScene()
 	invoked := false
-	s.OnStart(func(_ Context) {
+	s.OnStart(func(_ context.Context) {
 		invoked = true
 	})
 
@@ -200,7 +202,7 @@ func TestOnStart(t *testing.T) {
 func TestOnPhoto(t *testing.T) {
 	s := NewScene()
 	invoked := false
-	s.OnPhoto(func(_ Context) {
+	s.OnPhoto(func(_ context.Context) {
 		invoked = true
 	})
 
@@ -229,7 +231,7 @@ func TestOnPhoto(t *testing.T) {
 func TestOnSticker(t *testing.T) {
 	s := NewScene()
 	invoked := false
-	s.OnSticker(func(_ Context) {
+	s.OnSticker(func(_ context.Context) {
 		invoked = true
 	})
 
@@ -256,7 +258,7 @@ func TestOnSticker(t *testing.T) {
 func TestOnMessage(t *testing.T) {
 	s := NewScene()
 	invoked := false
-	s.OnMessage(func(ctx Context) {
+	s.OnMessage(func(ctx context.Context) {
 		invoked = true
 	})
 
@@ -280,13 +282,14 @@ func TestOnMessage(t *testing.T) {
 func TestOwnEvent(t *testing.T) {
 	s := NewScene()
 	messageTextContains := func(text string) EventDeterminant {
-		return func(ctx Context) bool {
-			return strings.Contains(ctx.Text(), text)
+		return func(ctx context.Context) bool {
+			bctx := GetBotContext(ctx)
+			return strings.Contains(bctx.Text(), text)
 		}
 	}
 
 	invoked := false
-	s.On(messageTextContains("hello"), func(_ Context) {
+	s.On(messageTextContains("hello"), func(_ context.Context) {
 		invoked = true
 	})
 	storage := NewInMemoryStateStorage()

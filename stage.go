@@ -1,6 +1,7 @@
 package telestage
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -10,8 +11,6 @@ import (
 var (
 	ErrSceneNotFound = errors.New("scene not found")
 )
-
-type StateGetter func(Context) string
 
 type SceneManagerInterface interface {
 	Add(state string, scene *Scene)
@@ -47,10 +46,10 @@ func (s *SceneManager) Get(sc string) *Scene {
 }
 
 func (s *SceneManager) HandleUpdate(upd tgbotapi.Update) error {
-	ctx := &NativeContext{
+	ctx := context.WithValue(context.Background(), BotCtxKey, &NativeContext{
 		bot: s.bot,
 		upd: &upd,
-	}
+	})
 
 	state, err := s.stateStorage.Get(ctx)
 	if err != nil {

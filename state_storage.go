@@ -1,6 +1,9 @@
 package telestage
 
-import "errors"
+import (
+	"context"
+	"errors"
+)
 
 var ErrNoSender = errors.New("no sender available in Update")
 
@@ -11,34 +14,6 @@ func (s *State) String() string {
 }
 
 type StateStorage interface {
-	Get(ctx Context) (State, error)
-	Set(ctx Context, state State) error
-}
-
-type InMemoryStateStorage struct {
-	states map[int64]State
-}
-
-func NewInMemoryStateStorage() *InMemoryStateStorage {
-	return &InMemoryStateStorage{
-		states: map[int64]State{},
-	}
-}
-
-func (m *InMemoryStateStorage) Get(ctx Context) (State, error) {
-	if ctx.Sender() == nil {
-		return "", ErrNoSender
-	}
-
-	state, ok := m.states[ctx.Sender().ID]
-	if !ok {
-		return "main", nil
-	}
-
-	return state, nil
-}
-
-func (m *InMemoryStateStorage) Set(ctx Context, state State) error {
-	m.states[ctx.Sender().ID] = state
-	return nil
+	Get(ctx context.Context) (State, error)
+	Set(ctx context.Context, state State) error
 }

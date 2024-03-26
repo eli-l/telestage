@@ -20,6 +20,44 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-package telestage
+package telestage_test
 
-//go:generate mockgen -destination=context_mock_test.go -package=telestage_test -source=context.go
+import (
+	"context"
+	"testing"
+
+	tgbotapi "github.com/eli-l/telegram-bot-api/v7"
+	"github.com/go-redis/redismock/v9"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
+
+	_ "github.com/go-redis/redismock/v9"
+
+	"github.com/eli-l/telestage"
+)
+
+func Test_RedisStorage(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	ctx := context.Background()
+	bctx := NewMockContext(ctrl)
+	bctx.EXPECT().Sender().Return(&tgbotapi.User{ID: 1}).AnyTimes()
+	ctx = telestage.WithBotContext(ctx, bctx)
+	db, mock := redismock.NewClientMock()
+
+	t.Run("Set", func(t *testing.T) {
+		mock.ExpectSet("1", "newState", -1).SetVal("OK")
+		storage := telestage.NewRedisStateStorage(db, telestage.ExpireNever)
+
+		err := storage.Set(ctx, "newState")
+		require.NoError(t, err)
+	})
+
+	t.Run("Get", func(t *testing.T) {
+		mock.ExpectGet("1").SetVal("newState")
+		storage := telestage.NewRedisStateStorage(db, telestage.ExpireNever)
+
+		state, err := storage.Get(ctx)
+		require.NoError(t, err)
+		require.Equal(t, telestage.State("newState"), state)
+	})
+}

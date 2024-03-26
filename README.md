@@ -1,10 +1,11 @@
-# Modern Golang Telegram bot fremework
+# Golang Telegram Bot Fremework
 
-[//]: # ([![Test]&#40;https://github.com/askoldex/telestage/actions/workflows/test.yml/badge.svg&#41;]&#40;https://github.com/askoldex/telestage/actions/workflows/test.yml&#41;)
+[![Test](https://github.com/eli-l/telestage/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/eli-l/telestage/actions/workflows/unit_tests.yml)
+
 
 [//]: # ([![codecov]&#40;https://codecov.io/gh/askoldex/telestage/branch/master/graph/badge.svg?token=RNHRHU3JZV&#41;]&#40;https://codecov.io/gh/askoldex/telestage&#41;)
 
-This fremework based on [go-telegram-bot-api](https://github.com/go-telegram-bot-api/telegram-bot-api) and inspired by [telegraf.js](https://telegraf.js.org/).
+This fremework based on [go-telegram-bot-api](https://github.com/eli-l/telegram-bot-api) and inspired by [telegraf.js](https://telegraf.js.org/).
 
 This is a fork of original work [telestage](https://github.com/kbgod/telestage)
 
@@ -16,6 +17,7 @@ This is a fork of original work [telestage](https://github.com/kbgod/telestage)
 - [x] Add gitignore
 - [x] Update codebase to use new fork without replaces
 - [x] Create GitHub actions for tests
+- [x] Add Redis support for state storage
 
 ## Telestage event driven framework using fsm.
 

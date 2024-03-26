@@ -25,17 +25,17 @@ func main() {
 	stg.Add("main", mainScene)
 
 	mainScene.Use(func(ef telestage.EventFn) telestage.EventFn {
-		return func(ctx telestage.Context) {
+		return func(ctx telestage.BotContext) {
 			if ctx.Message().Sticker == nil { // ignore if message is sticker
 				ef(ctx)
 			}
 		}
 	})
 
-	mainScene.OnCommand("ping", func(ctx telestage.Context) {
+	mainScene.OnCommand("ping", func(ctx telestage.BotContext) {
 		ctx.Reply("pong")
 	}, func(ef telestage.EventFn) telestage.EventFn {
-		return func(ctx telestage.Context) {
+		return func(ctx telestage.BotContext) {
 			if ctx.Upd().FromChat().IsPrivate() {
 				ef(ctx)
 			} else {
@@ -44,7 +44,7 @@ func main() {
 		}
 	})
 
-	mainScene.OnMessage(func(ctx telestage.Context) {
+	mainScene.OnMessage(func(ctx telestage.BotContext) {
 		ctx.Reply("Hello") // answer on any message
 	})
 
