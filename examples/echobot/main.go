@@ -32,7 +32,7 @@ func main() {
 		DB:       1,
 	})
 
-	rStateStore := telestage.NewRedisStateStorage(rdb, telestage.EXPIRE_HOUR)
+	rStateStore := telestage.NewRedisStateStorage(rdb, telestage.ExpireHour)
 	_ = rStateStore
 
 	stateStore := telestage.NewInMemoryStateStorage()

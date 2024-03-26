@@ -1,3 +1,25 @@
+// MIT License
+//
+// Copyright (c) 2024 eli-l
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 package telestage
 
 import (
@@ -9,22 +31,22 @@ import (
 )
 
 const (
-	EXPIRE_EXPIRED = iota
-	EXPIRE_NEVER   = iota
-	EXPIRE_KEEP    = iota
-	EXPIRE_HOUR    = iota
-	EXPIRE_DAY     = iota
+	ExpireExpired = iota
+	ExpireNever   = iota
+	ExpireKeep    = iota
+	ExpireHour    = iota
+	ExpireDay     = iota
 )
 
 func expirationFromInt(expiration int) time.Duration {
 	switch expiration {
-	case EXPIRE_EXPIRED:
+	case ExpireExpired:
 		return 0
-	case EXPIRE_HOUR:
+	case ExpireHour:
 		return time.Hour
-	case EXPIRE_DAY:
+	case ExpireDay:
 		return time.Hour * 24
-	case EXPIRE_NEVER, EXPIRE_KEEP:
+	case ExpireNever, ExpireKeep:
 		return -1
 	default:
 		return -1
@@ -56,6 +78,6 @@ func (s *RedisStateStorage) Get(ctx context.Context) (State, error) {
 func (s *RedisStateStorage) Set(ctx context.Context, state State) error {
 	botCtx := GetBotContext(ctx)
 	id := strconv.Itoa(int(botCtx.Sender().ID))
-	err := s.client.Set(ctx, id, state, s.defaultExpiration).Err()
+	err := s.client.Set(ctx, id, state.String(), s.defaultExpiration).Err()
 	return err
 }
