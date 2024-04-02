@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -26,13 +27,15 @@ func main() {
 
 	mainScene.Use(addUserBalance)
 
-	mainScene.OnCommand("add", func(ctx telestage.BotContext) {
-		ctx.Reply("working on it....")
+	mainScene.OnCommand("add", func(ctx context.Context) {
+		bctx := telestage.GetBotContext(ctx)
+		bctx.Reply("working on it....")
 	})
 
-	mainScene.OnMessage(func(ctx telestage.BotContext) {
-		account := ctx.Get("account").(*account)
-		_, err := ctx.Reply(fmt.Sprintf("Your balance: %d", account.Balance))
+	mainScene.OnMessage(func(ctx context.Context) {
+		bctx := telestage.GetBotContext(ctx)
+		account := bctx.Get("account").(*account)
+		_, err := bctx.Reply(fmt.Sprintf("Your balance: %d", account.Balance))
 		if err != nil {
 			log.Println(err)
 		}
@@ -58,8 +61,9 @@ type account struct {
 }
 
 func addUserBalance(ef telestage.EventFn) telestage.EventFn {
-	return func(ctx telestage.BotContext) {
-		ctx.Set("account", &account{500})
+	return func(ctx context.Context) {
+		bctx := telestage.GetBotContext(ctx)
+		bctx.Set("account", &account{500})
 		ef(ctx)
 	}
 }

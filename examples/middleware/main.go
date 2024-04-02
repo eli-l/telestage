@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
@@ -25,27 +26,31 @@ func main() {
 	stg.Add("main", mainScene)
 
 	mainScene.Use(func(ef telestage.EventFn) telestage.EventFn {
-		return func(ctx telestage.BotContext) {
-			if ctx.Message().Sticker == nil { // ignore if message is sticker
+		return func(ctx context.Context) {
+			bctx := telestage.GetBotContext(ctx)
+			if bctx.Message().Sticker == nil { // ignore if message is sticker
 				ef(ctx)
 			}
 		}
 	})
 
-	mainScene.OnCommand("ping", func(ctx telestage.BotContext) {
-		ctx.Reply("pong")
+	mainScene.OnCommand("ping", func(ctx context.Context) {
+		bctx := telestage.GetBotContext(ctx)
+		bctx.Reply("pong")
 	}, func(ef telestage.EventFn) telestage.EventFn {
-		return func(ctx telestage.BotContext) {
-			if ctx.Upd().FromChat().IsPrivate() {
+		return func(ctx context.Context) {
+			bctx := telestage.GetBotContext(ctx)
+			if bctx.Upd().FromChat().IsPrivate() {
 				ef(ctx)
 			} else {
-				ctx.Reply("This command available only in private chat")
+				bctx.Reply("This command available only in private chat")
 			}
 		}
 	})
 
-	mainScene.OnMessage(func(ctx telestage.BotContext) {
-		ctx.Reply("Hello") // answer on any message
+	mainScene.OnMessage(func(ctx context.Context) {
+		bctx := telestage.GetBotContext(ctx)
+		bctx.Reply("Hello") // answer on any message
 	})
 
 	if err != nil {
