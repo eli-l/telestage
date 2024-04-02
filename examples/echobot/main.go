@@ -79,7 +79,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	sceneManager := telestage.NewSceneManager(stateStore, bot)
+	sceneManager := telestage.NewSceneManagerWithDefault(stateStore, bot, "main")
 	sceneManager.Add("main", mainScene)
 	sceneManager.Add("message", messageScene)
 

@@ -109,7 +109,14 @@ func (nc *NativeContext) Text() string {
 func (nc *NativeContext) Reply(text string) (tgbotapi.Message, error) {
 	m := tgbotapi.NewMessage(nc.ChatID(), text)
 	m.LinkPreviewOptions.IsDisabled = nc.disableWebPreview
-	return nc.bot.Send(tgbotapi.NewMessage(nc.ChatID(), text))
+	return nc.bot.Send(m)
+}
+
+func (nc *NativeContext) ReplyQuote(text string) (tgbotapi.Message, error) {
+	m := tgbotapi.NewMessage(nc.ChatID(), text)
+	m.ReplyParameters.MessageID = nc.Message().MessageID
+	m.LinkPreviewOptions.IsDisabled = nc.disableWebPreview
+	return nc.bot.Send(m)
 }
 
 func (nc *NativeContext) ReplyWithMenu(text string, menu interface{}) (tgbotapi.Message, error) {

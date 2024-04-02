@@ -23,7 +23,7 @@ func main() {
 
 	stg := telestage.NewSceneManager(stateStore, bot)
 	mainScene := telestage.NewScene()
-	stg.Add("main", mainScene)
+	stg.Add("", mainScene)
 
 	mainScene.Use(func(ef telestage.EventFn) telestage.EventFn {
 		return func(ctx context.Context) {

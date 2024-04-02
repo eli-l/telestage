@@ -12,6 +12,13 @@ var (
 	ErrSceneNotFound = errors.New("scene not found")
 )
 
+type ErrorHandler func(ctx context.Context, err error) error
+
+func DefaultErrorHandler(ctx context.Context, err error) error {
+	fmt.Println(err)
+	return err
+}
+
 type SceneManagerInterface interface {
 	Add(state string, scene *Scene)
 	HandleUpdate(upd tgbotapi.Update) error
@@ -21,13 +28,27 @@ type SceneManager struct {
 	scenes       map[State]*Scene
 	bot          *tgbotapi.BotAPI
 	stateStorage StateStorage
+	defState     State
+	ErrorHandler ErrorHandler
 }
 
 func NewSceneManager(storage StateStorage, bot *tgbotapi.BotAPI) *SceneManager {
 	return &SceneManager{
+		scenes:       map[State]*Scene{"": {}},
+		bot:          bot,
+		stateStorage: storage,
+		defState:     "",
+		ErrorHandler: DefaultErrorHandler,
+	}
+}
+
+func NewSceneManagerWithDefault(storage StateStorage, bot *tgbotapi.BotAPI, defState string) *SceneManager {
+	return &SceneManager{
 		scenes:       map[State]*Scene{},
 		bot:          bot,
 		stateStorage: storage,
+		defState:     State(defState),
+		ErrorHandler: DefaultErrorHandler,
 	}
 }
 
@@ -45,6 +66,10 @@ func (s *SceneManager) Get(sc string) *Scene {
 	return scene
 }
 
+func (s *SceneManager) SetErrorHandler(handler ErrorHandler) {
+	s.ErrorHandler = handler
+}
+
 func (s *SceneManager) HandleUpdate(upd tgbotapi.Update) error {
 	ctx := context.WithValue(context.Background(), BotCtxKey, &NativeContext{
 		bot: s.bot,
@@ -56,9 +81,16 @@ func (s *SceneManager) HandleUpdate(upd tgbotapi.Update) error {
 		return err
 	}
 
-	scene, ok := s.scenes[state]
+	var scene *Scene
+	var ok bool
+	if state == "" {
+		scene, ok = s.scenes[s.defState]
+	} else {
+		scene, ok = s.scenes[state]
+	}
+
 	if !ok {
-		return fmt.Errorf("%w with name %s", ErrSceneNotFound, state)
+		return s.ErrorHandler(ctx, fmt.Errorf("%w with name %s", ErrSceneNotFound, state))
 	}
 
 	events := scene.GetEventHandler()

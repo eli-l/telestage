@@ -16,7 +16,7 @@ func TestStateGetting(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 	ctx := context.Background()
-	bctx := NewMockContext(ctrl)
+	bctx := NewMockBotContext(ctrl)
 	bctx.EXPECT().Sender().Return(&tgbotapi.User{ID: 1}).AnyTimes()
 	ctx = telestage.WithBotContext(ctx, bctx)
 
