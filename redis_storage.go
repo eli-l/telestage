@@ -69,7 +69,11 @@ func (s *RedisStateStorage) Get(ctx context.Context) (State, error) {
 	botCxt := GetBotContext(ctx)
 	id := strconv.Itoa(int(botCxt.Sender().ID))
 	r := s.client.Get(ctx, id)
+
 	if r.Err() != nil {
+		if r.Err() == redis.Nil {
+			return "", nil
+		}
 		return "", r.Err()
 	}
 	return State(r.Val()), nil

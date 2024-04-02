@@ -21,7 +21,7 @@ func main() {
 		panic(err)
 	}
 
-	stg := telestage.NewSceneManager(stateStore, bot)
+	stg := telestage.NewSceneManagerWithDefault(stateStore, bot, "main")
 	mainScene := telestage.NewScene()
 	stg.Add("main", mainScene)
 

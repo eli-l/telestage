@@ -16,31 +16,31 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-// MockContext is a mock of BotContext interface.
-type MockContext struct {
+// MockBotContext is a mock of BotContext interface.
+type MockBotContext struct {
 	ctrl     *gomock.Controller
-	recorder *MockContextMockRecorder
+	recorder *MockBotContextMockRecorder
 }
 
-// MockContextMockRecorder is the mock recorder for MockContext.
-type MockContextMockRecorder struct {
-	mock *MockContext
+// MockBotContextMockRecorder is the mock recorder for MockBotContext.
+type MockBotContextMockRecorder struct {
+	mock *MockBotContext
 }
 
-// NewMockContext creates a new mock instance.
-func NewMockContext(ctrl *gomock.Controller) *MockContext {
-	mock := &MockContext{ctrl: ctrl}
-	mock.recorder = &MockContextMockRecorder{mock}
+// NewMockBotContext creates a new mock instance.
+func NewMockBotContext(ctrl *gomock.Controller) *MockBotContext {
+	mock := &MockBotContext{ctrl: ctrl}
+	mock.recorder = &MockBotContextMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockContext) EXPECT() *MockContextMockRecorder {
+func (m *MockBotContext) EXPECT() *MockBotContextMockRecorder {
 	return m.recorder
 }
 
 // Bot mocks base method.
-func (m *MockContext) Bot() *tgbotapi.BotAPI {
+func (m *MockBotContext) Bot() *tgbotapi.BotAPI {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Bot")
 	ret0, _ := ret[0].(*tgbotapi.BotAPI)
@@ -48,13 +48,13 @@ func (m *MockContext) Bot() *tgbotapi.BotAPI {
 }
 
 // Bot indicates an expected call of Bot.
-func (mr *MockContextMockRecorder) Bot() *gomock.Call {
+func (mr *MockBotContextMockRecorder) Bot() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Bot", reflect.TypeOf((*MockContext)(nil).Bot))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Bot", reflect.TypeOf((*MockBotContext)(nil).Bot))
 }
 
 // Chat mocks base method.
-func (m *MockContext) Chat() *tgbotapi.Chat {
+func (m *MockBotContext) Chat() *tgbotapi.Chat {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Chat")
 	ret0, _ := ret[0].(*tgbotapi.Chat)
@@ -62,13 +62,13 @@ func (m *MockContext) Chat() *tgbotapi.Chat {
 }
 
 // Chat indicates an expected call of Chat.
-func (mr *MockContextMockRecorder) Chat() *gomock.Call {
+func (mr *MockBotContextMockRecorder) Chat() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Chat", reflect.TypeOf((*MockContext)(nil).Chat))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Chat", reflect.TypeOf((*MockBotContext)(nil).Chat))
 }
 
 // ChatID mocks base method.
-func (m *MockContext) ChatID() int64 {
+func (m *MockBotContext) ChatID() int64 {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ChatID")
 	ret0, _ := ret[0].(int64)
@@ -76,13 +76,13 @@ func (m *MockContext) ChatID() int64 {
 }
 
 // ChatID indicates an expected call of ChatID.
-func (mr *MockContextMockRecorder) ChatID() *gomock.Call {
+func (mr *MockBotContextMockRecorder) ChatID() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChatID", reflect.TypeOf((*MockContext)(nil).ChatID))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChatID", reflect.TypeOf((*MockBotContext)(nil).ChatID))
 }
 
 // Get mocks base method.
-func (m *MockContext) Get(key string) any {
+func (m *MockBotContext) Get(key string) any {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", key)
 	ret0, _ := ret[0].(any)
@@ -90,13 +90,13 @@ func (m *MockContext) Get(key string) any {
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockContextMockRecorder) Get(key any) *gomock.Call {
+func (mr *MockBotContextMockRecorder) Get(key any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockContext)(nil).Get), key)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockBotContext)(nil).Get), key)
 }
 
 // Message mocks base method.
-func (m *MockContext) Message() *tgbotapi.Message {
+func (m *MockBotContext) Message() *tgbotapi.Message {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Message")
 	ret0, _ := ret[0].(*tgbotapi.Message)
@@ -104,13 +104,13 @@ func (m *MockContext) Message() *tgbotapi.Message {
 }
 
 // Message indicates an expected call of Message.
-func (mr *MockContextMockRecorder) Message() *gomock.Call {
+func (mr *MockBotContextMockRecorder) Message() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Message", reflect.TypeOf((*MockContext)(nil).Message))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Message", reflect.TypeOf((*MockBotContext)(nil).Message))
 }
 
 // Reply mocks base method.
-func (m *MockContext) Reply(arg0 string) (tgbotapi.Message, error) {
+func (m *MockBotContext) Reply(arg0 string) (tgbotapi.Message, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Reply", arg0)
 	ret0, _ := ret[0].(tgbotapi.Message)
@@ -119,13 +119,13 @@ func (m *MockContext) Reply(arg0 string) (tgbotapi.Message, error) {
 }
 
 // Reply indicates an expected call of Reply.
-func (mr *MockContextMockRecorder) Reply(arg0 any) *gomock.Call {
+func (mr *MockBotContextMockRecorder) Reply(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Reply", reflect.TypeOf((*MockContext)(nil).Reply), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Reply", reflect.TypeOf((*MockBotContext)(nil).Reply), arg0)
 }
 
 // ReplyHTML mocks base method.
-func (m *MockContext) ReplyHTML(arg0 string) (tgbotapi.Message, error) {
+func (m *MockBotContext) ReplyHTML(arg0 string) (tgbotapi.Message, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReplyHTML", arg0)
 	ret0, _ := ret[0].(tgbotapi.Message)
@@ -134,13 +134,28 @@ func (m *MockContext) ReplyHTML(arg0 string) (tgbotapi.Message, error) {
 }
 
 // ReplyHTML indicates an expected call of ReplyHTML.
-func (mr *MockContextMockRecorder) ReplyHTML(arg0 any) *gomock.Call {
+func (mr *MockBotContextMockRecorder) ReplyHTML(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplyHTML", reflect.TypeOf((*MockContext)(nil).ReplyHTML), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplyHTML", reflect.TypeOf((*MockBotContext)(nil).ReplyHTML), arg0)
+}
+
+// ReplyQuote mocks base method.
+func (m *MockBotContext) ReplyQuote(arg0 string) (tgbotapi.Message, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ReplyQuote", arg0)
+	ret0, _ := ret[0].(tgbotapi.Message)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ReplyQuote indicates an expected call of ReplyQuote.
+func (mr *MockBotContextMockRecorder) ReplyQuote(arg0 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplyQuote", reflect.TypeOf((*MockBotContext)(nil).ReplyQuote), arg0)
 }
 
 // ReplyWithMenu mocks base method.
-func (m *MockContext) ReplyWithMenu(arg0 string, arg1 any) (tgbotapi.Message, error) {
+func (m *MockBotContext) ReplyWithMenu(arg0 string, arg1 any) (tgbotapi.Message, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReplyWithMenu", arg0, arg1)
 	ret0, _ := ret[0].(tgbotapi.Message)
@@ -149,13 +164,13 @@ func (m *MockContext) ReplyWithMenu(arg0 string, arg1 any) (tgbotapi.Message, er
 }
 
 // ReplyWithMenu indicates an expected call of ReplyWithMenu.
-func (mr *MockContextMockRecorder) ReplyWithMenu(arg0, arg1 any) *gomock.Call {
+func (mr *MockBotContextMockRecorder) ReplyWithMenu(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplyWithMenu", reflect.TypeOf((*MockContext)(nil).ReplyWithMenu), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplyWithMenu", reflect.TypeOf((*MockBotContext)(nil).ReplyWithMenu), arg0, arg1)
 }
 
 // ReplyWithMenuHTML mocks base method.
-func (m *MockContext) ReplyWithMenuHTML(arg0 string, arg1 any) (tgbotapi.Message, error) {
+func (m *MockBotContext) ReplyWithMenuHTML(arg0 string, arg1 any) (tgbotapi.Message, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ReplyWithMenuHTML", arg0, arg1)
 	ret0, _ := ret[0].(tgbotapi.Message)
@@ -164,13 +179,13 @@ func (m *MockContext) ReplyWithMenuHTML(arg0 string, arg1 any) (tgbotapi.Message
 }
 
 // ReplyWithMenuHTML indicates an expected call of ReplyWithMenuHTML.
-func (mr *MockContextMockRecorder) ReplyWithMenuHTML(arg0, arg1 any) *gomock.Call {
+func (mr *MockBotContextMockRecorder) ReplyWithMenuHTML(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplyWithMenuHTML", reflect.TypeOf((*MockContext)(nil).ReplyWithMenuHTML), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplyWithMenuHTML", reflect.TypeOf((*MockBotContext)(nil).ReplyWithMenuHTML), arg0, arg1)
 }
 
 // Sender mocks base method.
-func (m *MockContext) Sender() *tgbotapi.User {
+func (m *MockBotContext) Sender() *tgbotapi.User {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Sender")
 	ret0, _ := ret[0].(*tgbotapi.User)
@@ -178,37 +193,37 @@ func (m *MockContext) Sender() *tgbotapi.User {
 }
 
 // Sender indicates an expected call of Sender.
-func (mr *MockContextMockRecorder) Sender() *gomock.Call {
+func (mr *MockBotContextMockRecorder) Sender() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sender", reflect.TypeOf((*MockContext)(nil).Sender))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sender", reflect.TypeOf((*MockBotContext)(nil).Sender))
 }
 
 // Set mocks base method.
-func (m *MockContext) Set(key string, val any) {
+func (m *MockBotContext) Set(key string, val any) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Set", key, val)
 }
 
 // Set indicates an expected call of Set.
-func (mr *MockContextMockRecorder) Set(key, val any) *gomock.Call {
+func (mr *MockBotContextMockRecorder) Set(key, val any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockContext)(nil).Set), key, val)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockBotContext)(nil).Set), key, val)
 }
 
 // SetDisableWebPreviewForShortMethods mocks base method.
-func (m *MockContext) SetDisableWebPreviewForShortMethods(arg0 bool) {
+func (m *MockBotContext) SetDisableWebPreviewForShortMethods(arg0 bool) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "SetDisableWebPreviewForShortMethods", arg0)
 }
 
 // SetDisableWebPreviewForShortMethods indicates an expected call of SetDisableWebPreviewForShortMethods.
-func (mr *MockContextMockRecorder) SetDisableWebPreviewForShortMethods(arg0 any) *gomock.Call {
+func (mr *MockBotContextMockRecorder) SetDisableWebPreviewForShortMethods(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDisableWebPreviewForShortMethods", reflect.TypeOf((*MockContext)(nil).SetDisableWebPreviewForShortMethods), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDisableWebPreviewForShortMethods", reflect.TypeOf((*MockBotContext)(nil).SetDisableWebPreviewForShortMethods), arg0)
 }
 
 // Text mocks base method.
-func (m *MockContext) Text() string {
+func (m *MockBotContext) Text() string {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Text")
 	ret0, _ := ret[0].(string)
@@ -216,13 +231,13 @@ func (m *MockContext) Text() string {
 }
 
 // Text indicates an expected call of Text.
-func (mr *MockContextMockRecorder) Text() *gomock.Call {
+func (mr *MockBotContextMockRecorder) Text() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Text", reflect.TypeOf((*MockContext)(nil).Text))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Text", reflect.TypeOf((*MockBotContext)(nil).Text))
 }
 
 // Upd mocks base method.
-func (m *MockContext) Upd() *tgbotapi.Update {
+func (m *MockBotContext) Upd() *tgbotapi.Update {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Upd")
 	ret0, _ := ret[0].(*tgbotapi.Update)
@@ -230,7 +245,7 @@ func (m *MockContext) Upd() *tgbotapi.Update {
 }
 
 // Upd indicates an expected call of Upd.
-func (mr *MockContextMockRecorder) Upd() *gomock.Call {
+func (mr *MockBotContextMockRecorder) Upd() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upd", reflect.TypeOf((*MockContext)(nil).Upd))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upd", reflect.TypeOf((*MockBotContext)(nil).Upd))
 }
